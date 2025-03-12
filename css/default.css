@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
+:root{
+     --darkPink: #B52D59;
+     --pink: #FB6F92;
+     --white: #FFF6FA;
+     --blue: #5AA9E6;
+     --black: #454545;
+
+     --medium: 2.5rem;
+     --small: 1.4rem;
+     --little: 1.1rem;
+     --tiny: .9rem;
+}
+*{
+     font-family: 'Outfit' , sans-serif;
+}
+
+.rounded{
+     border-radius: .5rem;
+     padding: 1rem 3rem 1rem .5rem;
+     border: .3rem solid var(--pink);
+}
+button{
+     cursor: pointer;
+}

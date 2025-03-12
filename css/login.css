@@ -1,0 +1,77 @@
+body{
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 95vh;
+     background-color: rgba(0, 128, 0, 0.158) /* usun!!! */;
+}
+section{
+     padding: 0 5rem 2rem 5rem;
+     background-color: var(--white);
+     border-radius: 1rem;
+     border-top: .25rem solid var(--darkPink);
+     width: 35vh;
+}
+
+h2{
+     font-size: var(--medium);
+     text-align: center;
+     color: var(--darkPink);
+}
+p{
+     font-size: var(--little);
+}
+strong{
+     color: var(--pink);
+     font-weight: 700;
+}
+form{
+     width: 100%;
+}
+form p{
+     color: var(--pink);
+     margin: 1.5rem 0 .3rem 0;
+}
+form a p{
+     opacity: .6;
+     margin: .3rem 0 1.5rem 0;
+     font-size: var(--tiny);
+     transition: .2s;
+}
+form a p:hover{
+     color: var(--darkPink);
+}
+form a{
+     text-decoration: none;
+}
+form button{
+     background-color: var(--pink);
+     text-align: center;
+     padding: 1rem 2rem 1rem 2rem !important;
+     margin: 0 auto;
+     display: block;
+}
+button span{
+     font-size: var(--little);
+     gap: .5rem;
+     color: var(--white);
+     font-weight: 550;
+}
+form input {
+     width: 100%;
+     box-sizing: border-box;
+}
+#register{
+     text-align: center;
+}
+section div{
+     text-align: center;
+}
+section div p{
+     margin-bottom: .3rem;
+     color: var(--pink);
+}
+section div i{
+     font-size: var(--medium);
+     color: var(--pink);
+}

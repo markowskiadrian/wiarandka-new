@@ -75,3 +75,36 @@ section div i{
      font-size: var(--medium);
      color: var(--pink);
 }
+textarea{
+     width: 100%;
+     box-sizing: border-box;
+}
+select{
+     text-align: center;
+     width: 100%;
+     box-sizing: border-box;
+     background-color: var(--white);
+     font-size: var(--small);
+     color: var(--darkPink);
+}
+#religion{
+     margin-top: 1.5rem;
+}
+#register{
+     margin-top: 1.5rem;
+}
+hr{
+     margin-top: 1.5rem;
+     border: .1rem solid var(--darkPink);
+}
+.dark{
+     color: var(--darkPink);
+}
+.close{
+     position: absolute;
+     margin-left: 31rem;
+     color: var(--pink);
+}
+.close i{
+     font-size: var(--big);
+}

@@ -57,7 +57,7 @@
                               VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$username, $password, $email, $gender, $religion, $denomination, $bio]);
 
-        echo "Registration successful! <a href='login.php'>Login here</a>";
+        Header("Location: login.php");
     }
     ?>
 </body>

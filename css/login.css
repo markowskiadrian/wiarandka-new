@@ -108,3 +108,8 @@ hr{
 .close i{
      font-size: var(--big);
 }
+button[type="submit"]:hover{
+     transition: .2s;
+     background-color: var(--darkPink);
+     border: .3rem solid var(--darkPink);
+}

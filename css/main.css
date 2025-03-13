@@ -1,0 +1,33 @@
+body{
+     margin: 0;
+}
+#user{
+     display: flex;
+     justify-content: space-between;
+     background-color: var(--pink);
+     padding: .5rem 1rem .5rem 1rem;
+}
+#user .left{
+     display: flex;
+     flex-direction: row;
+     align-items: center;
+     gap: .5rem;
+}
+#user .right{
+     text-align: end;
+}
+#user img{
+     width: 4rem;
+     height: 4rem;
+     border-radius: 100%;
+}
+#user h2{
+     font-size: var(--small);
+     color: var(--white);
+     font-weight: 500;
+}
+#chats{
+     width: 50%;
+     box-shadow: 3px 0 5px -2px rgba(0, 0, 0, 0.3);
+     overflow-y: auto; /* Add scroll if content overflows */
+}

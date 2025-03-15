@@ -9,12 +9,47 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Obsługa wysyłania wiadomości z wykorzystaniem PRG, aby uniknąć ponownego wysyłania przy odświeżeniu
+// Pobranie danych aktualnego użytkownika, w tym płci
+$stmt = $pdo->prepare("SELECT username, profile_pic, gender FROM users WHERE user_id = ?");
+$stmt->execute([$user_id]);
+$current_user = $stmt->fetch();
+
+// Obsługa swipe'owania (przeniesione ze swipe.php)
+if (isset($_POST['swipe']) && isset($_POST['target_id'])) {
+    $target_id = $_POST['target_id'];
+    $action = $_POST['swipe'];
+
+    // Sprawdzenie płci użytkownika docelowego
+    $stmt = $pdo->prepare("SELECT LOWER(gender) AS gender FROM users WHERE user_id = ?");
+    $stmt->execute([$target_id]);
+    $target_user = $stmt->fetch();
+    if (!$target_user || $target_user['gender'] === strtolower($current_user['gender'])) {
+        // Jeśli użytkownik ma tę samą płeć – operacja niedozwolona
+        header("Location: main.php?view=sparowani");
+        exit();
+    }
+    
+    // Zapis akcji swipe
+    $stmt = $pdo->prepare("INSERT INTO matches (user1_id, user2_id, swipe_action) VALUES (?, ?, ?)");
+    $stmt->execute([$user_id, $target_id, $action]);
+    
+    // Sprawdzenie wzajemnego "like" jeśli akcja to 'like'
+    if ($action == 'like') {
+        $stmt = $pdo->prepare("SELECT * FROM matches WHERE user1_id = ? AND user2_id = ? AND swipe_action = 'like'");
+        $stmt->execute([$target_id, $user_id]);
+        $mutual = $stmt->fetch();
+        // (opcjonalnie: dodaj powiadomienie o dopasowaniu)
+    }
+    header("Location: main.php?view=sparowani");
+    exit();
+}
+
+// Obsługa wysyłania wiadomości (PRG)
 if (isset($_POST['send']) && !empty($_POST['message']) && isset($_POST['receiver_id'])) {
     $receiver_id = $_POST['receiver_id'];
     $message = trim($_POST['message']);
 
-    // Sprawdź, czy istnieje dopasowanie
+    // Sprawdzenie, czy istnieje match (dopasowanie)
     $stmt = $pdo->prepare("SELECT * FROM matches 
                           WHERE (user1_id = ? AND user2_id = ? AND swipe_action = 'like')
                           OR (user1_id = ? AND user2_id = ? AND swipe_action = 'like')");
@@ -25,32 +60,35 @@ if (isset($_POST['send']) && !empty($_POST['message']) && isset($_POST['receiver
         $stmt = $pdo->prepare("INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)");
         $stmt->execute([$user_id, $receiver_id, $message]);
     }
-    // Po zapisaniu wiadomości następuje przekierowanie (PRG)
-    header("Location: main.php?receiver_id=" . $receiver_id);
+    header("Location: main.php?view=messages&receiver_id=" . $receiver_id);
     exit();
 }
 
-// Pobierz dane aktualnego użytkownika
-$stmt = $pdo->prepare("SELECT username, profile_pic FROM users WHERE user_id = ?");
-$stmt->execute([$user_id]);
-$current_user = $stmt->fetch();
+// Ustalenie aktualnego widoku – domyślnie wiadomości
+$view = isset($_GET['view']) ? $_GET['view'] : 'messages';
 
-// Pobierz dopasowania
-$stmt = $pdo->prepare("SELECT DISTINCT u.user_id, u.username, u.profile_pic FROM matches m
-                      JOIN users u ON (m.user1_id = u.user_id OR m.user2_id = u.user_id)
-                      WHERE (m.user1_id = ? OR m.user2_id = ?)
-                      AND u.user_id != ?
-                      AND m.swipe_action = 'like'");
+// Pobranie matchy dla czatu (widok wiadomości)
+$stmt = $pdo->prepare("
+    SELECT u.user_id, u.username, u.profile_pic 
+    FROM users u
+    WHERE EXISTS (
+        SELECT 1 FROM matches m
+        WHERE m.user1_id = ? AND m.user2_id = u.user_id AND m.swipe_action = 'like'
+    ) 
+    AND EXISTS (
+        SELECT 1 FROM matches m
+        WHERE m.user1_id = u.user_id AND m.user2_id = ? AND m.swipe_action = 'like'
+    )
+    AND u.user_id != ?
+");
 $stmt->execute([$user_id, $user_id, $user_id]);
 $matches = $stmt->fetchAll();
 
-// Jeśli został wybrany odbiorca, pobierz dane czatu
-$receiver_id = isset($_GET['receiver_id']) ? $_GET['receiver_id'] : null;
+// Obsługa czatu – jeśli widok wiadomości i wybrany został odbiorca
+$receiver_id = (isset($_GET['receiver_id']) && $view === 'messages') ? $_GET['receiver_id'] : null;
 $messages = [];
 $receiver = [];
-
 if ($receiver_id) {
-    // Sprawdź, czy istnieje dopasowanie z odbiorcą
     $stmt = $pdo->prepare("SELECT * FROM matches 
                           WHERE (user1_id = ? AND user2_id = ? AND swipe_action = 'like')
                           OR (user1_id = ? AND user2_id = ? AND swipe_action = 'like')");
@@ -58,7 +96,6 @@ if ($receiver_id) {
     $is_match = $stmt->fetch();
 
     if ($is_match) {
-        // Pobierz wiadomości
         $stmt = $pdo->prepare("SELECT m.*, u.username, u.profile_pic 
                               FROM messages m
                               JOIN users u ON m.sender_id = u.user_id
@@ -68,13 +105,26 @@ if ($receiver_id) {
         $stmt->execute([$user_id, $receiver_id, $receiver_id, $user_id]);
         $messages = $stmt->fetchAll();
 
-        // Pobierz dane odbiorcy
         $stmt = $pdo->prepare("SELECT username, profile_pic FROM users WHERE user_id = ?");
         $stmt->execute([$receiver_id]);
         $receiver = $stmt->fetch();
     } else {
         $receiver_id = null;
     }
+}
+
+// Jeśli widok 'sparowani' – pobierz kandydata do swipe'owania z uwzględnieniem płci
+$candidate = null;
+if ($view === 'sparowani') {
+    $current_gender = strtolower($current_user['gender']);
+    $opposite_gender = ($current_gender === 'male') ? 'female' : 'male';
+    $stmt = $pdo->prepare("SELECT * FROM users 
+                           WHERE user_id != ? 
+                           AND LOWER(gender) = ? 
+                           AND user_id NOT IN (SELECT user2_id FROM matches WHERE user1_id = ?)
+                           ORDER BY RAND() LIMIT 1");
+    $stmt->execute([$user_id, $opposite_gender, $user_id]);
+    $candidate = $stmt->fetch();
 }
 ?>
 <!DOCTYPE html>
@@ -86,7 +136,6 @@ if ($receiver_id) {
     <title>Wiarandka - strona główna</title>
     <link rel="stylesheet" href="css/default.css">
     <link rel="stylesheet" href="css/main.css">
-
 </head>
 
 <body>
@@ -96,7 +145,7 @@ if ($receiver_id) {
             <h1><strong>wia</strong>randka</h1>
         </div>
         <div class="right">
-            <a href="main.php">Strona główna</a>
+            <a href="main.php?view=messages">Strona główna</a>
             <a href="matches.php">Nasza misja</a>
             <a href="settings.php">Kontakt</a>
             <button class="rounded">
@@ -117,65 +166,95 @@ if ($receiver_id) {
                     <a href="settings.php"><i class="bi bi-gear-fill"></i></a>
                 </div>
             </div>
-            <div class="matches-list">
-                <h3>Wiadomości</h3>
-
-                <?php if ($matches): ?>
-                    <?php foreach ($matches as $match): ?>
-                        <hr>
-                        <div class="match<?php echo ($receiver_id == $match['user_id']) ? ' selected' : ''; ?>">
-                            <a href="main.php?receiver_id=<?= $match['user_id'] ?>">
-                                <img src="<?= htmlspecialchars($match['profile_pic']) ?>" alt="Profil">
-                                <div>
-                                    <h4><?= htmlspecialchars($match['username']) ?></h4>
-                                </div>
-                            </a>
-                        </div>
-                        <hr>
-                        <br>
-                    <?php endforeach; ?>
-
-                <?php else: ?>
-                    <p>Nie masz jeszcze dopasowań</p>
-                <?php endif; ?>
+            <!-- Nawigacja między widokami -->
+            <div class="tabs">
+                <a href="main.php?view=messages" class="<?= $view === 'messages' ? 'active' : '' ?>">Wiadomości</a>
+                <a href="main.php?view=sparowani" class="<?= $view === 'sparowani' ? 'active' : '' ?>">Sparowani</a>
             </div>
+            <?php if ($view === 'messages'): ?>
+                <div class="matches-list">
+                    <h3>Wiadomości</h3>
+                    <?php if ($matches): ?>
+                        <?php foreach ($matches as $match): ?>
+                            <hr>
+                            <div class="match<?= ($receiver_id == $match['user_id']) ? ' selected' : ''; ?>">
+                                <a href="main.php?view=messages&receiver_id=<?= $match['user_id'] ?>">
+                                    <img src="<?= htmlspecialchars($match['profile_pic']) ?>" alt="Profil">
+                                    <div>
+                                        <h4><?= htmlspecialchars($match['username']) ?></h4>
+                                    </div>
+                                </a>
+                            </div>
+                            <hr>
+                            <br>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Nie masz jeszcze dopasowań</p>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <!-- W widoku 'sparowani' lewa sekcja pozostaje pusta -->
+                <div class="matches-list">
+                    <!-- Pusta sekcja -->
+                </div>
+            <?php endif; ?>
         </section>
 
         <section id="interactive">
-            <?php if ($receiver_id && $receiver): ?>
-                <div class="chat-container">
-                    <div class="chat-header">
-                        <img src="<?= htmlspecialchars($receiver['profile_pic']) ?>" class="profile-pic">
-                        <h3><?= htmlspecialchars($receiver['username']) ?></h3>
-                    </div>
+            <?php if ($view === 'messages'): ?>
+                <?php if ($receiver_id && $receiver): ?>
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <img src="<?= htmlspecialchars($receiver['profile_pic']) ?>" class="profile-pic">
+                            <h3><?= htmlspecialchars($receiver['username']) ?></h3>
+                        </div>
 
-                    <div class="messages">
-                        <?php foreach ($messages as $msg): ?>
-                            <div class="message <?= $msg['sender_id'] == $user_id ? 'sent' : 'received' ?>">
-                                <div class="message-header">
-                                    <img src="<?= htmlspecialchars($msg['profile_pic']) ?>" class="profile-pic">
-                                    <strong><?= htmlspecialchars($msg['username']) ?></strong>
-                                    <span class="time"><?= date('H:i', strtotime($msg['sent_at'])) ?></span>
+                        <div class="messages">
+                            <?php foreach ($messages as $msg): ?>
+                                <div class="message <?= $msg['sender_id'] == $user_id ? 'sent' : 'received' ?>">
+                                    <div class="message-header">
+                                        <img src="<?= htmlspecialchars($msg['profile_pic']) ?>" class="profile-pic">
+                                        <strong><?= htmlspecialchars($msg['username']) ?></strong>
+                                        <span class="time"><?= date('H:i', strtotime($msg['sent_at'])) ?></span>
+                                    </div>
+                                    <p><?= nl2br(htmlspecialchars($msg['message'])) ?></p>
                                 </div>
-                                <p><?= nl2br(htmlspecialchars($msg['message'])) ?></p>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+                            <?php endforeach; ?>
+                        </div>
 
-                    <form method="POST" class="chat-form">
-                        <input type="hidden" name="receiver_id" value="<?= $receiver_id ?>">
-                        <textarea name="message" placeholder="Napisz wiadomość..." required></textarea>
-                        <button type="submit" name="send" class="rounded">Wyślij</button>
-                    </form>
-                </div>
-            <?php else: ?>
-                <div class="placeholder">
-                    <img src="images/chat-icon.svg" alt="Ikona czatu">
-                    <p>Wybierz rozmówcę, aby rozpocząć konwersację</p>
+                        <form method="POST" class="chat-form">
+                            <input type="hidden" name="receiver_id" value="<?= $receiver_id ?>">
+                            <textarea name="message" placeholder="Napisz wiadomość..." required></textarea>
+                            <button type="submit" name="send" class="rounded">Wyślij</button>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <div class="placeholder">
+                        <img src="images/chat-icon.svg" alt="Ikona czatu">
+                        <p>Wybierz rozmówcę, aby rozpocząć konwersację</p>
+                    </div>
+                <?php endif; ?>
+            <?php elseif ($view === 'sparowani'): ?>
+                <div class="swipe-container">
+                    <?php if ($candidate): ?>
+                        <div class="card">
+                            <img src="<?= htmlspecialchars($candidate['profile_pic']) ?>" alt="Profil">
+                            <h3><?= htmlspecialchars($candidate['username']) ?></h3>
+                            <!-- Dodatkowe informacje o kandydacie -->
+                        </div>
+                        <form method="POST" class="swipe-form">
+                            <input type="hidden" name="target_id" value="<?= $candidate['user_id'] ?>">
+                            <button type="submit" name="swipe" value="like" class="like-button">Like</button>
+                            <button type="submit" name="swipe" value="dislike" class="dislike-button">Dislike</button>
+                        </form>
+                    <?php else: ?>
+                        <div class="placeholder">
+                            <p>Brak kandydatów</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </section>
     </div>
 </body>
-
 </html>

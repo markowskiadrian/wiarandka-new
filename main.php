@@ -145,9 +145,9 @@ if ($view === 'sparowani') {
             <h1><strong>wia</strong>randka</h1>
         </div>
         <div class="right">
-            <a href="main.php?view=messages">Strona główna</a>
-            <a href="matches.php">Nasza misja</a>
-            <a href="settings.php">Kontakt</a>
+            <a href="">Strona główna</a>
+            <a href="">Nasza misja</a>
+            <a href="">Kontakt</a>
             <button class="rounded">
                 <i class="bi bi-person-fill"></i>
                 <?= htmlspecialchars($current_user['username']) ?>
@@ -169,11 +169,10 @@ if ($view === 'sparowani') {
             <!-- Nawigacja między widokami -->
             <div class="tabs">
                 <a href="main.php?view=messages" class="<?= $view === 'messages' ? 'active' : '' ?>">Wiadomości</a>
-                <a href="main.php?view=sparowani" class="<?= $view === 'sparowani' ? 'active' : '' ?>">Sparowani</a>
+                <a href="main.php?view=sparowani" class="<?= $view === 'sparowani' ? 'active' : '' ?>">Swipes</a>
             </div>
             <?php if ($view === 'messages'): ?>
-                <div class="matches-list">
-                    <h3>Wiadomości</h3>
+                <div class="matches-list">  
                     <?php if ($matches): ?>
                         <?php foreach ($matches as $match): ?>
                             <hr>
@@ -186,16 +185,16 @@ if ($view === 'sparowani') {
                                 </a>
                             </div>
                             <hr>
-                            <br>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <p>Nie masz jeszcze dopasowań</p>
+                        <p id="info"><i class="bi bi-hearts"></i><br>Obecnie nikogo<br> tu nie ma. Przejdź do Swipes!</p>
                     <?php endif; ?>
                 </div>
             <?php else: ?>
                 <!-- W widoku 'sparowani' lewa sekcja pozostaje pusta -->
                 <div class="matches-list">
-                    <!-- Pusta sekcja -->
+                    
+                    <p id="info"><i class="bi bi-arrow-through-heart-fill"></i><br>Tysiące osób czeka na bycie Twoim matchem!</p>
                 </div>
             <?php endif; ?>
         </section>
@@ -204,11 +203,6 @@ if ($view === 'sparowani') {
             <?php if ($view === 'messages'): ?>
                 <?php if ($receiver_id && $receiver): ?>
                     <div class="chat-container">
-                        <div class="chat-header">
-                            <img src="<?= htmlspecialchars($receiver['profile_pic']) ?>" class="profile-pic">
-                            <h3><?= htmlspecialchars($receiver['username']) ?></h3>
-                        </div>
-
                         <div class="messages">
                             <?php foreach ($messages as $msg): ?>
                                 <div class="message <?= $msg['sender_id'] == $user_id ? 'sent' : 'received' ?>">
@@ -225,13 +219,13 @@ if ($view === 'sparowani') {
                         <form method="POST" class="chat-form">
                             <input type="hidden" name="receiver_id" value="<?= $receiver_id ?>">
                             <textarea name="message" placeholder="Napisz wiadomość..." required></textarea>
-                            <button type="submit" name="send" class="rounded">Wyślij</button>
+                            <button type="submit" name="send" class="rounded" id="sendbutton"><i class="bi bi-arrow-right-short"></i></button>
                         </form>
                     </div>
                 <?php else: ?>
                     <div class="placeholder">
-                        <img src="images/chat-icon.svg" alt="Ikona czatu">
-                        <p>Wybierz rozmówcę, aby rozpocząć konwersację</p>
+                        <p id="iconp"><i class="bi bi-chat-heart-fill"></i></p>
+                        <p>Wybierz rozmówcę,<br>aby rozpocząć konwersację!</p>
                     </div>
                 <?php endif; ?>
             <?php elseif ($view === 'sparowani'): ?>
@@ -244,12 +238,14 @@ if ($view === 'sparowani') {
                         </div>
                         <form method="POST" class="swipe-form">
                             <input type="hidden" name="target_id" value="<?= $candidate['user_id'] ?>">
-                            <button type="submit" name="swipe" value="like" class="like-button">Like</button>
-                            <button type="submit" name="swipe" value="dislike" class="dislike-button">Dislike</button>
+                            <button type="submit" name="swipe" value="like" class="lovebutton"><i class="bi bi-heart-fill"></i></button>
+                            <button type="submit" name="swipe" value="dislike" class="lovebutton"><i class="bi bi-x-lg"></i></button>
                         </form>
                     <?php else: ?>
                         <div class="placeholder">
-                            <p>Brak kandydatów</p>
+                            <p id="iconp"><i class="bi bi-search-heart-fill"></i></p>
+                            <p>Osoba taka jak Ty zasługuje <br>na kogoś perfekcyjnego.</p>
+                            <p id="desc">Szukamy dla Ciebie nowych kandydatów.<br>Prosimy, odwiedź nas później!</p>
                         </div>
                     <?php endif; ?>
                 </div>

@@ -79,66 +79,35 @@ if ($receiver_id) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wiarandka - strona główna</title>
     <link rel="stylesheet" href="css/default.css">
     <link rel="stylesheet" href="css/main.css">
-    <style>
-        /* Style czatu */
-        .chat-container { height: calc(100vh - 200px); display: flex; flex-direction: column; }
-        .messages { flex: 1; overflow-y: auto; padding: 10px; border: 1px solid #ddd; margin: 10px 0; }
-        .message { margin: 10px 0; padding: 10px; border-radius: 5px; max-width: 70%; }
-        .received { background: #f1f1f1; }
-        .sent { background: #e3f2fd; margin-left: auto; }
-        .message-header { display: flex; align-items: center; margin-bottom: 5px; }
-        .profile-pic { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
-        .time { font-size: 0.8em; color: #666; margin-left: auto; }
-        .chat-form { display: flex; gap: 10px; margin-top: auto; }
-        .chat-form textarea { flex: 1; padding: 10px; resize: none; }
-        
-        /* Panel z danymi użytkownika przywrócony */
-        #user-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #f9f9f9;
-            border-bottom: 1px solid #ddd;
-        }
-        #user-panel .left {
-            display: flex;
-            align-items: center;
-        }
-        #user-panel img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        #user-panel .right {\n            font-size: 1.2em;\n        }\n    </style>
+
 </head>
+
 <body>
     <header>
         <div class="left">
             <img src="images/logo.svg" alt="Logo Wiarandka">
-            <h1><strong>Wia</strong>randka</h1>
+            <h1><strong>wia</strong>randka</h1>
         </div>
         <div class="right">
-            <a href="main.php">strona główna</a>
-            <a href="matches.php">dopasowania</a>
-            <a href="settings.php">ustawienia</a>
+            <a href="main.php">Strona główna</a>
+            <a href="matches.php">Nasza misja</a>
+            <a href="settings.php">Kontakt</a>
             <button class="rounded">
                 <i class="bi bi-person-fill"></i>
                 <?= htmlspecialchars($current_user['username']) ?>
             </button>
         </div>
     </header>
-    
+
     <div class="main-container">
         <section id="chats">
-            <!-- Panel użytkownika (przywrócony) -->
             <div id="user-panel">
                 <div class="left">
                     <img src="<?= htmlspecialchars($current_user['profile_pic']) ?>" alt="Zdjęcie profilowe">
@@ -149,22 +118,29 @@ if ($receiver_id) {
                 </div>
             </div>
             <div class="matches-list">
-                <h3>Twoje dopasowania</h3>
+                <h3>Wiadomości</h3>
+
                 <?php if ($matches): ?>
                     <?php foreach ($matches as $match): ?>
-                        <a href="main.php?receiver_id=<?= $match['user_id'] ?>" class="match">
-                            <img src="<?= htmlspecialchars($match['profile_pic']) ?>" alt="Profil">
-                            <div>
-                                <h4><?= htmlspecialchars($match['username']) ?></h4>
-                            </div>
-                        </a>
+                        <hr>
+                        <div class="match<?php echo ($receiver_id == $match['user_id']) ? ' selected' : ''; ?>">
+                            <a href="main.php?receiver_id=<?= $match['user_id'] ?>">
+                                <img src="<?= htmlspecialchars($match['profile_pic']) ?>" alt="Profil">
+                                <div>
+                                    <h4><?= htmlspecialchars($match['username']) ?></h4>
+                                </div>
+                            </a>
+                        </div>
+                        <hr>
+                        <br>
                     <?php endforeach; ?>
+
                 <?php else: ?>
                     <p>Nie masz jeszcze dopasowań</p>
                 <?php endif; ?>
             </div>
         </section>
-        
+
         <section id="interactive">
             <?php if ($receiver_id && $receiver): ?>
                 <div class="chat-container">
@@ -172,7 +148,7 @@ if ($receiver_id) {
                         <img src="<?= htmlspecialchars($receiver['profile_pic']) ?>" class="profile-pic">
                         <h3><?= htmlspecialchars($receiver['username']) ?></h3>
                     </div>
-                    
+
                     <div class="messages">
                         <?php foreach ($messages as $msg): ?>
                             <div class="message <?= $msg['sender_id'] == $user_id ? 'sent' : 'received' ?>">
@@ -201,4 +177,5 @@ if ($receiver_id) {
         </section>
     </div>
 </body>
+
 </html>

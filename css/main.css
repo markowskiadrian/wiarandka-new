@@ -231,6 +231,7 @@ textarea::placeholder {
 .card img {
   border-radius: 1rem;
   width: 70%;
+  height: 70%;
 }
 .card h3 {
   color: var(--pink);

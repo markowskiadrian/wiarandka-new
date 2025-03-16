@@ -1,115 +1,142 @@
-body{
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     height: 95vh;
-     background-color: rgba(0, 128, 0, 0.158) /* usun!!! */;
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 95vh;
+  background-color: rgba(0, 128, 0, 0.158) /* usun!!! */;
 }
-section{
-     padding: 0 5rem 2rem 5rem;
-     background-color: var(--white);
-     border-radius: 1rem;
-     border-top: .25rem solid var(--darkPink);
-     width: 35vh;
+section {
+  padding: 0 5rem 2rem 5rem;
+  background-color: var(--white);
+  border-radius: 1rem;
+  border-top: 0.25rem solid var(--darkPink);
+  width: 35vh;
 }
 
-h2{
-     font-size: var(--medium);
-     text-align: center;
-     color: var(--darkPink);
+h2 {
+  font-size: var(--medium);
+  text-align: center;
+  color: var(--darkPink);
 }
-p{
-     font-size: var(--little);
+p {
+  font-size: var(--little);
 }
-strong{
-     color: var(--pink);
-     font-weight: 700;
+strong {
+  color: var(--pink);
+  font-weight: 700;
 }
-form{
-     width: 100%;
+form {
+  width: 100%;
 }
-form p{
-     color: var(--pink);
-     margin: 1.5rem 0 .3rem 0;
+form p {
+  color: var(--pink);
+  margin: 1.5rem 0 0.3rem 0;
 }
-form a p{
-     opacity: .6;
-     margin: .3rem 0 1.5rem 0;
-     font-size: var(--tiny);
-     transition: .2s;
+form a p {
+  opacity: 0.6;
+  margin: 0.3rem 0 1.5rem 0;
+  font-size: var(--tiny);
+  transition: 0.2s;
 }
-form a p:hover{
-     color: var(--darkPink);
+form a p:hover {
+  color: var(--darkPink);
 }
-form a{
-     text-decoration: none;
+form a {
+  text-decoration: none;
 }
-form button{
-     background-color: var(--pink);
-     text-align: center;
-     padding: 1rem 2rem 1rem 2rem !important;
-     margin: 0 auto;
-     display: block;
+form button {
+  background-color: var(--pink);
+  text-align: center;
+  padding: 1rem 2rem 1rem 2rem !important;
+  margin: 0 auto;
+  display: block;
 }
-button span{
-     font-size: var(--little);
-     gap: .5rem;
-     color: var(--white);
-     font-weight: 550;
+button span {
+  font-size: var(--little);
+  gap: 0.5rem;
+  color: var(--white);
+  font-weight: 550;
 }
 form input {
-     width: 100%;
-     box-sizing: border-box;
+  width: 100%;
+  box-sizing: border-box;
 }
-#register{
-     text-align: center;
+#register {
+  text-align: center;
 }
-section div{
-     text-align: center;
+section div {
+  text-align: center;
 }
-section div p{
-     margin-bottom: .3rem;
+section div p {
+  margin-bottom: 0.3rem;
+  color: var(--pink);
+}
+section div i {
+  font-size: var(--medium);
+  color: var(--pink);
+}
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+select {
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--white);
+  font-size: var(--small);
+  color: var(--darkPink);
+}
+#religion {
+  margin-top: 1.5rem;
+}
+#register {
+  margin-top: 1.5rem;
+}
+hr {
+  margin-top: 1.5rem;
+  border: 0.1rem solid var(--darkPink);
+}
+.dark {
+  color: var(--darkPink);
+}
+.close {
+  position: absolute;
+}
+.close i {
+  font-size: var(--medium);
+  color: var(--pink);
+}
+button[type="submit"]:hover {
+  transition: 0.2s;
+  background-color: var(--darkPink);
+  border: 0.3rem solid var(--darkPink);
+}
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  display: flex;
+  justify-content: center;
+     align-items: center;
+  width: 4rem; 
+  height: 3rem; 
+  background: url("path/to/your/icon.png") no-repeat center center;
+  background-size: contain;
+  cursor: pointer;
+  border: .3rem solid var(--pink);
+  border-radius: .5rem;
+  transition: border-color 0.3s;
+}
+.custom-file-upload p{
+     margin: 0;
+}
+.custom-file-upload i{
+     font-size: var(--small) !important;
      color: var(--pink);
 }
-section div i{
-     font-size: var(--medium);
-     color: var(--pink);
-}
-textarea{
-     width: 100%;
-     box-sizing: border-box;
-}
-select{
-     text-align: center;
-     width: 100%;
-     box-sizing: border-box;
-     background-color: var(--white);
-     font-size: var(--small);
-     color: var(--darkPink);
-}
-#religion{
-     margin-top: 1.5rem;
-}
-#register{
-     margin-top: 1.5rem;
-}
-hr{
-     margin-top: 1.5rem;
-     border: .1rem solid var(--darkPink);
-}
-.dark{
-     color: var(--darkPink);
-}
-.close{
-     position: absolute;
-     margin-left: 31rem;
-     color: var(--pink);
-}
-.close i{
-     font-size: var(--big);
-}
-button[type="submit"]:hover{
-     transition: .2s;
-     background-color: var(--darkPink);
-     border: .3rem solid var(--darkPink);
+#user{
+     display: flex;
+     gap: 1rem;
 }
